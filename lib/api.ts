@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://socart-backend.up.railway.app',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://socart-backend-production.up.railway.app',
 })
 
 export const getTelegramUser = (): any | null => {
