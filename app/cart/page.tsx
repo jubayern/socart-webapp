@@ -17,7 +17,7 @@ export default function CartPage() {
   useEffect(() => {
     const u = getTelegramUser()
     setUser(u)
-    api.get(`/api/admin/settings?secret=socart_admin_2024`)
+    api.get('/api/admin/settings/public')
       .then(r => setSettings(r.data)).catch(() => {})
     if (u) {
       api.get(`/api/cart/${u.id}`)

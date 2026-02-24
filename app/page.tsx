@@ -92,17 +92,13 @@ export default function Home() {
             )}
           </Link>
         </div>
-        {/* Search */}
-        <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-slate-50 rounded-xl text-sm text-slate-700 placeholder-slate-400 outline-none focus:bg-slate-100"
-          />
-        </div>
+        {/* Search — taps go to dedicated search page */}
+        <Link href="/search" className="relative flex items-center">
+          <Search size={16} className="absolute left-3 text-slate-400" />
+          <div className="w-full pl-9 pr-4 py-2.5 bg-slate-50 rounded-xl text-sm text-slate-400 cursor-pointer">
+            Search products...
+          </div>
+        </Link>
       </header>
 
       <main className="px-4 pt-4 space-y-5">

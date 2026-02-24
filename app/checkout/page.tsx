@@ -34,7 +34,7 @@ export default function CheckoutPage() {
       set('name', `${u.first_name} ${u.last_name || ''}`.trim())
       api.get(`/api/cart/${u.id}`).then(r => setCart(r.data)).catch(() => {})
     }
-    api.get('/api/admin/settings?secret=socart_admin_2024')
+    api.get('/api/admin/settings/public')
       .then(r => setSettings(r.data)).catch(() => {})
   }, [])
 
