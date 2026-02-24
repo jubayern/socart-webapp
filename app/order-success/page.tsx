@@ -1,63 +1,46 @@
 'use client'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { CheckCircle, Package, Home, Coins } from 'lucide-react'
+import { api } from '../../lib/api'
 
-import { Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
-import { CheckCircle, Package, ShoppingBag } from 'lucide-react'
+export default function OrderSuccessPage() {
+  const router = useRouter()
+  const sp = useSearchParams()
+  const orderNum = sp?.get('order')
+  const [order, setOrder] = useState<any>(null)
 
-function SuccessContent() {
-  const params = useSearchParams()
-  const order  = params.get('order')
+  useEffect(() => {
+    if (orderNum) api.get(`/api/orders/track/${orderNum}`).then(r => setOrder(r.data?.order)).catch(()=>{})
+  }, [orderNum])
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4">
-      <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 max-w-sm w-full text-center">
+    <div style={{ minHeight:'100vh', background:'#f8fafc', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24, textAlign:'center' }}>
+      <div style={{ width:80, height:80, borderRadius:'50%', background:'linear-gradient(135deg,#10b981,#059669)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:20, boxShadow:'0 8px 24px rgba(16,185,129,.3)' }}>
+        <CheckCircle size={40} color="white"/>
+      </div>
+      <h1 style={{ fontSize:24, fontWeight:800, color:'#0f172a', marginBottom:8 }}>Order Placed!</h1>
+      <p style={{ fontSize:14, color:'#64748b', marginBottom:6 }}>Thank you for your order 🎉</p>
+      {orderNum && <p style={{ fontSize:16, fontWeight:800, color:'#7c3aed', fontFamily:'monospace', marginBottom:16 }}>{orderNum}</p>}
 
-        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5">
-          <CheckCircle size={40} className="text-green-500" strokeWidth={1.5} />
-        </div>
-
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Order Placed!</h1>
-        <p className="text-slate-500 text-sm mb-5">
-          Your order has been successfully placed. You will receive a Telegram notification shortly.
-        </p>
-
-        {order && (
-          <div className="bg-slate-50 rounded-2xl p-4 mb-6">
-            <p className="text-xs text-slate-400 mb-1">Order Number</p>
-            <p className="text-xl font-bold text-blue-600 tracking-wider">{order}</p>
+      {order?.coins_earned > 0 && (
+        <div style={{ background:'#fef3c7', borderRadius:16, padding:'14px 24px', marginBottom:20, border:'1px solid #fde68a', display:'flex', alignItems:'center', gap:10 }}>
+          <span style={{ fontSize:24 }}>🪙</span>
+          <div style={{ textAlign:'left' }}>
+            <p style={{ fontWeight:800, fontSize:15, color:'#92400e' }}>+{order.coins_earned} Coins Earned!</p>
+            <p style={{ fontSize:12, color:'#b45309' }}>Coins added to your account</p>
           </div>
-        )}
-
-        <div className="space-y-3">
-          <Link
-            href="/orders"
-            className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm"
-          >
-            <Package size={16} />
-            Track My Order
-          </Link>
-          <Link
-            href="/"
-            className="flex items-center justify-center gap-2 w-full py-3 border-2 border-slate-200 text-slate-600 rounded-xl font-semibold text-sm"
-          >
-            <ShoppingBag size={16} />
-            Continue Shopping
-          </Link>
         </div>
+      )}
+
+      <div style={{ display:'flex', gap:10, width:'100%', maxWidth:300 }}>
+        <button onClick={() => router.push(`/order-tracking?order=${orderNum}`)} style={{ flex:1, padding:'13px', borderRadius:13, border:'2px solid #7c3aed', background:'white', color:'#7c3aed', fontWeight:700, fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7 }}>
+          <Package size={15}/> Track
+        </button>
+        <button onClick={() => router.push('/')} style={{ flex:1, padding:'13px', borderRadius:13, border:'none', background:'linear-gradient(135deg,#7c3aed,#4f46e5)', color:'white', fontWeight:700, fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:7, boxShadow:'0 4px 14px rgba(109,40,217,.3)' }}>
+          <Home size={15}/> Home
+        </button>
       </div>
     </div>
-  )
-}
-
-export default function OrderSuccess() {
-  return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-screen bg-bg">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
-      <SuccessContent />
-    </Suspense>
   )
 }

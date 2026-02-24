@@ -1,27 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-* {
-  margin: 0;
-  padding: 0;
+*, *::before, *::after {
+  margin: 0; padding: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   background: #f8fafc;
   color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
 }
 
-/* scrollbar hide */
+:root {
+  --brand:      #6d28d9;
+  --brand-lt:   rgba(109,40,217,0.1);
+  --brand-glow: rgba(109,40,217,0.2);
+  --brand-text: #7c3aed;
+  --green:      #10b981;
+  --red:        #ef4444;
+  --amber:      #f59e0b;
+  --blue:       #3b82f6;
+}
+
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* line clamp */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -29,6 +39,32 @@ body {
   overflow: hidden;
 }
 
-/* smooth active press */
 button, a { transition: all 0.15s ease; }
 button:active { transform: scale(0.97); }
+a:active     { transform: scale(0.98); }
+
+/* Slide-up sheet */
+@keyframes slideUp  { from{transform:translateY(100%)} to{transform:translateY(0)}  }
+@keyframes fadeIn   { from{opacity:0}                  to{opacity:1}                }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes spin     { to{transform:rotate(360deg)} }
+
+.anim-slideup { animation: slideUp .3s cubic-bezier(.32,1,.64,1) forwards }
+.anim-fadein  { animation: fadeIn .2s ease forwards }
+.anim-fadeup  { animation: fadeUp .25s ease forwards }
+
+/* Flash sale pulse */
+@keyframes flashPulse {
+  0%,100% { opacity:1 }
+  50%     { opacity:.7 }
+}
+.flash-pulse { animation: flashPulse 1.5s ease-in-out infinite }
+
+/* Announcement marquee */
+@keyframes marquee { from{transform:translateX(100%)} to{transform:translateX(-100%)} }
+.marquee { animation: marquee 18s linear infinite }
+
+/* Input */
+input, textarea, select {
+  font-family: 'DM Sans', sans-serif;
+}

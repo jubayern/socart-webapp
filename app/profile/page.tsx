@@ -1,85 +1,118 @@
 'use client'
-
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { User, Package, ShoppingCart, ChevronRight, Hash } from 'lucide-react'
-import { getTelegramUser } from '../../lib/api'
-import BottomNav from '../../components/BottomNav'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Package, Heart, Tag, Coins, Users, TicketCheck, Bell, Settings, ChevronRight, Copy, Gift, MapPin, Zap } from 'lucide-react'
+import { api, getTelegramUser } from '../../lib/api'
+import BottomNav from '../../components/BottomNav'
 
 export default function ProfilePage() {
-  const router  = useRouter()
-  const [user, setUser] = useState<any>(null)
+  const router = useRouter()
+  const [user, setUser]       = useState<any>(null)
+  const [info, setInfo]       = useState<any>(null)
+  const [coins, setCoins]     = useState(0)
+  const [copied, setCopied]   = useState(false)
 
-  useEffect(() => { setUser(getTelegramUser()) }, [])
+  useEffect(() => {
+    const u = getTelegramUser(); setUser(u)
+    if (u) {
+      api.get('/api/referral/info').then(r => setInfo(r.data)).catch(()=>{})
+      api.get('/api/coins/balance').then(r => setCoins(r.data.balance||0)).catch(()=>{})
+    }
+  }, [])
 
-  const menu = [
-    { href: '/orders', label: 'My Orders',  Icon: Package      },
-    { href: '/cart',   label: 'My Cart',    Icon: ShoppingCart },
+  const copyCode = () => {
+    if (!info?.referral_code) return
+    navigator.clipboard.writeText(info.referral_code).catch(()=>{})
+    setCopied(true); setTimeout(() => setCopied(false), 2000)
+  }
+
+  const MENU = [
+    { href:'/orders',        Icon:Package,     label:'My Orders',          sub:'Track all your orders'   },
+    { href:'/wishlist',      Icon:Heart,       label:'Wishlist',            sub:'Saved products'          },
+    { href:'/coins',         Icon:Coins,       label:'Coins & Rewards',     sub:`${coins} coins available` },
+    { href:'/referral',      Icon:Users,       label:'Referral',            sub:'Earn by referring friends' },
+    { href:'/support',       Icon:TicketCheck, label:'Support',             sub:'Help & tickets'          },
+    { href:'/notifications', Icon:Bell,        label:'Notifications',       sub:'Alerts & updates'        },
+    { href:'/order-tracking', Icon:MapPin,     label:'Track Order',         sub:'Real-time tracking'      },
   ]
 
+  if (!user) return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', flexDirection:'column', gap:12 }}>
+      <Zap size={32} color="#7c3aed"/>
+      <p style={{ color:'#94a3b8', fontSize:13 }}>Please open via Telegram</p>
+    </div>
+  )
+
   return (
-    <div className="min-h-screen bg-bg pb-24">
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-100 px-4 py-3">
-        <h1 className="font-semibold text-slate-800">Profile</h1>
+    <div style={{ minHeight:'100vh', background:'#f8fafc', paddingBottom:80 }}>
+      <header style={{ background:'white', borderBottom:'1px solid #f1f5f9', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <p style={{ fontWeight:800, fontSize:17, color:'#0f172a' }}>Profile</p>
       </header>
 
-      {user ? (
-        <div className="px-4 py-4 space-y-4">
-          {/* User Card */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-                {user.first_name?.[0]?.toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <h2 className="font-bold text-slate-900 text-lg truncate">
-                  {user.first_name} {user.last_name || ''}
-                </h2>
-                {user.username && (
-                  <p className="text-slate-400 text-sm">@{user.username}</p>
-                )}
-                <div className="flex items-center gap-1 mt-1">
-                  <Hash size={11} className="text-slate-300" />
-                  <p className="text-xs text-slate-300">{user.id}</p>
-                </div>
-              </div>
+      <div style={{ padding:'14px 14px', display:'flex', flexDirection:'column', gap:12 }}>
+
+        {/* User Card */}
+        <div style={{ background:'linear-gradient(135deg,#7c3aed,#4f46e5)', borderRadius:22, padding:20, color:'white' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:14, marginBottom:16 }}>
+            <div style={{ width:56, height:56, borderRadius:18, background:'rgba(255,255,255,.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, fontWeight:800 }}>
+              {user.first_name?.[0]?.toUpperCase()}
+            </div>
+            <div>
+              <p style={{ fontWeight:800, fontSize:17, marginBottom:2 }}>{user.first_name} {user.last_name||''}</p>
+              {user.username && <p style={{ fontSize:12, opacity:.8 }}>@{user.username}</p>}
             </div>
           </div>
 
-          {/* Menu */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            {menu.map(({ href, label, Icon }, i) => (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-3 px-4 py-4 active:bg-slate-50
-                  ${i < menu.length - 1 ? 'border-b border-slate-100' : ''}`}
-              >
-                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-                  <Icon size={16} className="text-blue-600" />
-                </div>
-                <span className="font-medium text-slate-700 flex-1">{label}</span>
-                <ChevronRight size={16} className="text-slate-300" />
-              </Link>
+          {/* Stats row */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+            {[
+              { label:'Coins', val: coins, icon:'🪙' },
+              { label:'Ref Balance', val: `৳${(info?.referral_balance||0).toFixed(0)}`, icon:'💰' },
+              { label:'Orders', val: info?.total_orders||0, icon:'📦' },
+            ].map(({label,val,icon}) => (
+              <div key={label} style={{ background:'rgba(255,255,255,.15)', borderRadius:12, padding:'10px 8px', textAlign:'center' }}>
+                <p style={{ fontSize:16 }}>{icon}</p>
+                <p style={{ fontWeight:800, fontSize:15 }}>{val}</p>
+                <p style={{ fontSize:10, opacity:.75 }}>{label}</p>
+              </div>
             ))}
           </div>
+        </div>
 
-          {/* App Info */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm text-center">
-            <p className="font-bold text-slate-700">SoCart</p>
-            <p className="text-xs text-slate-400 mt-0.5">Version 1.0.0</p>
+        {/* Referral Code */}
+        {info?.referral_code && (
+          <div style={{ background:'white', borderRadius:16, padding:14, border:'1px solid #ede9fe', display:'flex', alignItems:'center', gap:12 }}>
+            <div style={{ width:40, height:40, borderRadius:12, background:'#ede9fe', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Gift size={18} color="#7c3aed"/>
+            </div>
+            <div style={{ flex:1 }}>
+              <p style={{ fontSize:11, fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'0.05em' }}>Your Referral Code</p>
+              <p style={{ fontSize:17, fontWeight:800, color:'#7c3aed', fontFamily:'monospace', letterSpacing:'0.1em' }}>{info.referral_code}</p>
+            </div>
+            <button onClick={copyCode} style={{ padding:'8px 14px', borderRadius:10, background: copied?'#dcfce7':'#ede9fe', border:'none', cursor:'pointer', fontSize:12, fontWeight:700, color: copied?'#16a34a':'#7c3aed' }}>
+              {copied ? '✓ Copied!' : <><Copy size={12}/> Copy</>}
+            </button>
           </div>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center h-[70vh] text-slate-400 text-center px-8">
-          <User size={56} strokeWidth={1.1} className="text-slate-200 mb-4" />
-          <p className="font-semibold text-slate-600">Not logged in</p>
-          <p className="text-sm mt-1">Please open SoCart via Telegram</p>
-        </div>
-      )}
+        )}
 
-      <BottomNav />
+        {/* Menu */}
+        <div style={{ background:'white', borderRadius:18, border:'1px solid #f1f5f9', overflow:'hidden' }}>
+          {MENU.map(({ href, Icon, label, sub }, i) => (
+            <Link key={href} href={href} style={{ display:'flex', alignItems:'center', gap:12, padding:'14px 16px', borderBottom: i<MENU.length-1?'1px solid #f8fafc':'none', textDecoration:'none' }}>
+              <div style={{ width:38, height:38, borderRadius:12, background:'#f5f3ff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <Icon size={17} color="#7c3aed"/>
+              </div>
+              <div style={{ flex:1 }}>
+                <p style={{ fontWeight:700, fontSize:13, color:'#0f172a' }}>{label}</p>
+                <p style={{ fontSize:11, color:'#94a3b8', marginTop:1 }}>{sub}</p>
+              </div>
+              <ChevronRight size={15} color="#cbd5e1"/>
+            </Link>
+          ))}
+        </div>
+      </div>
+      <BottomNav/>
     </div>
   )
 }
