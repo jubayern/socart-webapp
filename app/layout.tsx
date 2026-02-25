@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import InitUser from '../components/InitUser'
 
 export const metadata: Metadata = {
   title: 'SoCart',
@@ -13,7 +14,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <script src="https://telegram.org/js/telegram-web-app.js" />
       </head>
-      <body>{children}</body>
+      <body>
+        <InitUser />
+        {children}
+      </body>
     </html>
   )
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle, Package, Home } from 'lucide-react'
-import { api } from '../../lib/api'
+import { api, getTelegramUser } from '../../lib/api'
 
 export default function OrderSuccessClient() {
   const router = useRouter()
@@ -12,7 +12,10 @@ export default function OrderSuccessClient() {
   const [order, setOrder] = useState<any>(null)
 
   useEffect(() => {
-    if (orderNum) api.get(`/api/orders/track/${orderNum}`).then((r) => setOrder(r.data?.order)).catch(() => {})
+    const u = getTelegramUser()
+    if (orderNum && u?.id) {
+      api.get(`/api/orders/track/${orderNum}?telegram_id=${u.id}`).then((r) => setOrder(r.data?.order)).catch(() => {})
+    }
   }, [orderNum])
 
   return (
